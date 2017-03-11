@@ -1,5 +1,6 @@
 import logging
 import argparse
+import psycopg2
 
 # Argument format when calling script
 # type (put, get), name (name of snippet), snippet (content of snippet)
@@ -8,6 +9,10 @@ import argparse
 
 # Set the log output file
 logging.basicConfig(filename="snippets.log",level=logging.DEBUG)
+
+logging.debug("Connecting to PostgreSQL")
+connection = psycopg2.connect(database="snippets")
+logging.debug("Database connection established.")
 
 def put(name, snippet):
     """
