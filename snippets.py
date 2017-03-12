@@ -21,16 +21,29 @@ def put(name, snippet):
     Returns the name and the snippet.
     """
     logging.info("Storing snippet {!r}: {!r}".format(name, snippet))
+    
     cursor = connection.cursor()
-    command = "insert into snippets values (%s, %s)"
     
     try:
-        command = "insert into snippets values (%s, %s)"
-        cursor.execute(command, (name, snippet))
+        cursor.execute("insert into snippets values (%s, %s)", (name, snippet))
     except psycopg2.IntegrityError as e:
         connection.rollback()
-        command = "update snippets set message=%s where keyword=%s"
-        cursor.execute(command, (snippet, name))
+        cursor.execute("update snippets set message=%s where keyword=%s", (name, snippet))
+    """
+    try:
+        with connection, connection.cursor() as cursor:
+            cursor.execute("insert into snippets values (%s, %s)", (snippet, name))
+    except psycopg2.IntegrityError as e:
+        with connection, connection.cursor() as cursor:
+            connection.rollback()
+            cursor.execute("update snippets set message=%s where keyword=%s", (snippet, name))
+        
+    with connection, connection.cursor() as cursor:
+        cursor.execute("insert into snippets values (%s, %s)", (snippet, name))
+        #except psycopg2.IntegrityError as e:
+  #          connection.rollback()
+   #         cursor.execute("update snippets set message=%s where keyword=%s", (snippet, name))
+            """
         
     connection.commit()
     logging.debug("Snippet stored successfully.")
@@ -44,10 +57,11 @@ def get(name):
     Returns the snippet.
     """
     logging.info("Retrieving snippet {!r}".format(name))
-    cursor = connection.cursor()
-    command = "select message from snippets where keyword=(%s)"
-    cursor.execute(command, (name, ))
-    row = cursor.fetchone()
+    
+    with connection, connection.cursor() as cursor:
+        cursor.execute("select message from snippets where keyword=%s", (name,))
+        row = cursor.fetchone()
+    
     connection.commit()
     logging.debug("Snippet retrieved successfully.")
     
