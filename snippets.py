@@ -55,6 +55,18 @@ def get(name):
         
     return row[0]
     
+def catalog():
+    """
+    catalog
+    Lists searchable keywords.
+    
+    You can currently retrieve snippets only if you know their keywords. How do 
+    you know what keywords you can look up? You'll need to create a new
+    argparse subparser, taking no parameters. Then in the catalog() function,
+    you'll need to query the keywords from the snippets table
+    """
+    print("You have accessed the catalog.")
+    
 def main():
     """
     main
@@ -72,8 +84,12 @@ def main():
     
     # Subparser for the get command
     logging.debug("Constructing get subparser")
-    get_purser = subparsers.add_parser("get", help="Retrieve a snippet")
-    get_purser.add_argument("name", help="Name of the snippet")
+    get_parser = subparsers.add_parser("get", help="Retrieve a snippet")
+    get_parser.add_argument("name", help="Name of the snippet")
+    
+    # Subparser for the catalog command
+    logging.debug("Constructing catalog subparser")
+    catalog_parser = subparsers.add_parser("catalog", help="Catalog of snippets")
 
     arguments = parser.parse_args()
     
@@ -87,6 +103,8 @@ def main():
     elif command == "get":
         snippet = get(**arguments)
         print("Retrieved snippet: {!r}".format(snippet))
+    elif command == "catalog":
+        catalog()
     
 if __name__ == "__main__":
     main()
