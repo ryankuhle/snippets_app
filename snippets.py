@@ -59,13 +59,14 @@ def catalog():
     """
     catalog
     Lists searchable keywords.
-    
-    You can currently retrieve snippets only if you know their keywords. How do 
-    you know what keywords you can look up? You'll need to create a new
-    argparse subparser, taking no parameters. Then in the catalog() function,
-    you'll need to query the keywords from the snippets table
     """
-    print("You have accessed the catalog.")
+    logging.info("Printing keyword catalog.")
+    
+    with connection, connection.cursor() as cursor:
+        cursor.execute("select * from snippets order by keyword")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row[0])
     
 def main():
     """
