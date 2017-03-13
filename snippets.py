@@ -1,3 +1,23 @@
+"""
+snippets
+Notetaking program to store short clips of text.
+
+Features to Add:
+Hidden snippets
+1) Maybe you don't want all your snippets to be visible in the catalog. 
+Create a column hidden boolean not null default false and have the catalog 
+and search functions filter their results with where not hidden. You can 
+then add optional arguments to the put subcommand such as --hide, which will
+set the hidden flag, and one of --show, --unhide, --no-hide, or --hide=0, 
+which will reset it. (If neither flag is set, leave the hidden flag as it was.)
+2) Delete snippet with confirmation
+3) Date and time snippet was recorded
+
+Bugs to Fix:
+What to do if incorrect command entered.
+
+"""
+
 import logging
 import argparse
 import psycopg2
@@ -67,6 +87,18 @@ def catalog():
         rows = cursor.fetchall()
         for row in rows:
             print(row[0])
+
+def search(string):            
+    """
+    search
+    """
+    logging.info("Searching snippets for: {!r}".format(string))
+    
+    with connection, connection.cursor() as cursor:
+        cursor.execute("select * from snippets where message like '%{}%'".format(string))
+        rows = cursor.fetchall()
+        for row in rows:
+            print("Keyword: ", row[0], " Snippet: ", row[1])
     
 def main():
     """
@@ -90,7 +122,12 @@ def main():
     
     # Subparser for the catalog command
     logging.debug("Constructing catalog subparser")
-    catalog_parser = subparsers.add_parser("catalog", help="Catalog of snippets")
+    catalog_parser = subparsers.add_parser("catalog", help="Catalog of snippet keywords")
+    
+    # Subparser for the search command
+    logging.debug("Constructing search subparser")
+    search_parser = subparsers.add_parser("search", help="Search snippets")
+    search_parser.add_argument("string", help="Snippet search string")
 
     arguments = parser.parse_args()
     
@@ -104,6 +141,8 @@ def main():
     elif command == "get":
         snippet = get(**arguments)
         print("Retrieved snippet: {!r}".format(snippet))
+    elif command == "search":
+        string = search(**arguments)
     elif command == "catalog":
         catalog()
     
